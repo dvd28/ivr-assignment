@@ -19,16 +19,17 @@ class image_converter:
     rospy.init_node('image_processing', anonymous=True)
     # initialize a publisher to send images from camera1 to a topic named image_topic1
     self.image_pub1 = rospy.Publisher("image_topic1",Image, queue_size = 1)
-    # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
-    self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw",Image,self.callback1)
+    self.joints_pub1 = rospy.Publisher("joints_pos1",Float64MultiArray, queue_size = 10)
+    self.positions_pub1 = rospy.Publisher("joints_positions1",Float64MultiArray, queue_size = 10)
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
-
-
+    # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
+    self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw",Image,self.callback1)
+   
 
 
 #----------------------------------
-def detect_red1(self,image):
+  def detect_red1(self,image):
       # Isolate the blue colour in the image as a binary image
       mask = cv2.inRange(image, (0, 0, 100), (0, 0, 255))
       # This applies a dilate that makes the binary region larger (the more iterations the larger it becomes)
@@ -77,21 +78,21 @@ def detect_red1(self,image):
   # Calculate the conversion from pixel to meter
   def pixel2meter1(self,image):
       # Obtain the centre of each coloured blob
-      circle1Pos = self.detect_blue(image)
-      circle2Pos = self.detect_green(image)
+      circle1Pos = self.detect_blue1(image)
+      circle2Pos = self.detect_green1(image)
       # find the distance between two circles
       dist = np.sum((circle1Pos - circle2Pos)**2)
       return 3 / np.sqrt(dist)
 
 
     # Calculate the relevant joint angles from the image
-  def detect_joint_angle1(self,image):
-    a = self.pixel2meter(image)
+  def detect_joint_angles1(self,image):
+    a = self.pixel2meter1(image)
     # Obtain the centre of each coloured blob 
-    center = a * self.detect_yellow(image)
-    circle1Pos = a * self.detect_blue(image) 
-    circle2Pos = a * self.detect_green(image) 
-    circle3Pos = a * self.detect_red(image)
+    center = a * self.detect_yellow1(image)
+    circle1Pos = a * self.detect_blue1(image) 
+    circle2Pos = a * self.detect_green1(image) 
+    circle3Pos = a * self.detect_red1(image)
     # Solve using trigonometry
     ja1 = np.arctan2(center[0]- circle1Pos[0], center[1] - circle1Pos[1])
     ja2 = np.arctan2(circle1Pos[0]-circle2Pos[0], circle1Pos[1]-circle2Pos[1]) - ja1
@@ -99,13 +100,13 @@ def detect_red1(self,image):
     return np.array([ja1, ja2, ja3])
   
   #--------------------------------------------
-def detect_joint_position1(self,image):
-    a = self.pixel2meter(image)
+  def detect_joint_positions1(self,image):
+    a = self.pixel2meter1(image)
     # Obtain the centre of each coloured blob 
-    center = a * self.detect_yellow(image)
-    circle1Pos = a * self.detect_blue(image) 
-    circle2Pos = a * self.detect_green(image) 
-    circle3Pos = a * self.detect_red(image)
+    center = a * self.detect_yellow1(image)
+    circle1Pos = a * self.detect_blue1(image) 
+    circle2Pos = a * self.detect_green1(image) 
+    circle3Pos = a * self.detect_red1(image)
 
     # make joint position into 2D array(Position array)
     return np.array([[0.0,center[1],center[0]],[0.0,circle1Pos[1],circle1Pos[0]],[0.0,circle2Pos[1],circle2Pos[0]],[0.0,circle3Pos[1],circle3Pos[0]] ])
@@ -117,32 +118,38 @@ def detect_joint_position1(self,image):
   def callback1(self,data):
     # Recieve the image
     try:
-      self.cv_image1 = self.bridge.imgmsg_to_cv2(data, "bgr8")
+      cv_image1 = self.bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as e:
       print(e)
-    
+
+    a = self.detect_joint_angles1(cv_image1)
+    b = self.detect_joint_positions1(cv_image1)
     # Uncomment if you want to save the image
     #cv2.imwrite('image_copy.png', cv_image)
-    a = self.detect_joint_angles(cv_image1)
-    b = self.detect_joint_position(cv_image1)
-
-    im1=cv2.imshow('window1', self.cv_image1)
-    cv2.waitKey(1)
     
+
+
+    im1=cv2.imshow('window1',cv_image1)
+    cv2.waitKey(3)
+
     self.joints1 = Float64MultiArray()
-    self.joints1.data = a 
+    self.joints1.data=a
     self.positions1 = Float64MultiArray()
-    self.positions1.data = b
+    self.positions1.data=b
+    
 
 
     # Publish the results
     try: 
-      self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
+      self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image1, "bgr8"))
       self.joints_pub1.publish(self.joints1)
-      self.joints_pub1.publish(self.positions1)
+      self.positions_pub1.publish(self.positions1) 
+      print(self.joints1)
+      print(self.positions1)
 
     except CvBridgeError as e:
       print(e)
+
 
 # call the class
 def main(args):
