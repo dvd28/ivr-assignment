@@ -109,7 +109,7 @@ class image_converter:
     circle3Pos = a * self.detect_red1(image)
 
     # make joint position into 2D array(Position array)
-    return np.array([[0.0,center[1],center[0]],[0.0,circle1Pos[1],circle1Pos[0]],[0.0,circle2Pos[1],circle2Pos[0]],[0.0,circle3Pos[1],circle3Pos[0]] ])
+    return np.array([[0.0,center[0],center[1]],[0.0,circle1Pos[0],circle1Pos[1]],[0.0,circle2Pos[0],circle2Pos[1]],[0.0,circle3Pos[0],circle3Pos[1]] ])
 
 
 
