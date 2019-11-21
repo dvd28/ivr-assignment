@@ -144,8 +144,10 @@ class image_converter:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image1, "bgr8"))
       self.joints_pub1.publish(self.joints1)
       self.positions_pub1.publish(self.positions1) 
-      print(self.joints1)
-      print(self.positions1)
+      #print(self.joints1)
+      #print(self.positions1)
+      with open('positions1.txt', 'wb') as fp:
+        pickle.dump(self.positions1, fp)
 
     except CvBridgeError as e:
       print(e)

@@ -141,6 +141,8 @@ class image_converter:
       self.positions_pub2.publish(self.positions2) 
       print(self.joints2)
       print(self.positions2)
+      with open('positions2.txt', 'wb') as fp:
+        pickle.dump(self.positions2, fp)
 
     except CvBridgeError as e:
       print(e)
