@@ -91,13 +91,27 @@ class image_converter:
   def detect_joint_positions2(self,image):
     a = self.pixel2meter2(image)
     # Obtain the centre of each coloured blob 
-    center = a * self.detect_yellow2(image)
-    circle1Pos = a * self.detect_blue2(image) 
-    circle2Pos = a * self.detect_green2(image) 
-    circle3Pos = a * self.detect_red2(image)
+    yellow = a * self.detect_yellow2(image)
+    blue = a * self.detect_blue2(image) 
+    green = a * self.detect_green2(image) 
+    red = a * self.detect_red2(image)
+
+#--------------------------------------------------
+    yellow_x=yellow[0]
+    yellow_z=yellow[1]
+    yellow[0]=yellow[0]-yellow_x+0.0000000001
+    blue[0]=blue[0]-yellow_x+0.00000000002
+    green[0]=green[0]-yellow_x+0.00000000003
+    red[0]=red[0]-yellow_x+0.00000000004
+
+    yellow[1]=yellow_z-yellow[1]+0.0000000001
+    blue[1]=yellow_z-blue[1]+0.00000000002
+    green[1]=yellow_z-green[1]+0.00000000003
+    red[1]=yellow_z-red[1]+0.00000000004
+#--------------------------------------------------
 
     # make joint position into 2D array(Position array)
-    return np.array([[center[0],0.0,center[1]],[circle1Pos[0],0.0,circle1Pos[1]],[circle2Pos[0],0.0,circle2Pos[1]],[circle3Pos[0],0.0,circle3Pos[1]] ])
+    return np.array([[yellow[0],0.0,yellow[1]],[blue[0],0.0,blue[1]],[green[0],0.0,green[1]],[red[0],0.0,red[1]] ])
 
 
   # Recieve data, process it, and publish
@@ -113,8 +127,8 @@ class image_converter:
     d = self.detect_joint_positions2(cv_image2)
 
  
-    im2=cv2.imshow('window2',cv_image2)
-    cv2.waitKey(3)
+    #im2=cv2.imshow('window2',cv_image2)
+    cv2.waitKey(1)
 
     self.positions2 = Float64MultiArray()
     self.positions2.data=d
@@ -124,8 +138,9 @@ class image_converter:
     # Publish the results
     try: 
       self.image_pub2.publish(self.bridge.cv2_to_imgmsg(cv_image2, "bgr8"))
-      self.positions_pub2.publish(self.positions2)
-      print(self.positions2)
+      self.positions_pub2.publish(self.positions2) 
+      # print(self.positions2.data)
+
       with open('positions2.txt', 'wb') as fp:
         pickle.dump(self.positions2, fp)
 
@@ -140,7 +155,7 @@ def main(args):
   try:
     rospy.spin()
   except KeyboardInterrupt:
-    print("Shutting down")
+	print("Shutting down")
   cv2.destroyAllWindows()
 
 # run the code if the node is called

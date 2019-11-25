@@ -93,13 +93,27 @@ class image_converter:
   def detect_joint_positions1(self,image):
     a = self.pixel2meter1(image)
     # Obtain the centre of each coloured blob 
-    center = a * self.detect_yellow1(image)
-    circle1Pos = a * self.detect_blue1(image) 
-    circle2Pos = a * self.detect_green1(image) 
-    circle3Pos = a * self.detect_red1(image)
+    yellow = a * self.detect_yellow1(image)
+    blue = a * self.detect_blue1(image) 
+    green = a * self.detect_green1(image) 
+    red = a * self.detect_red1(image)
+#coverting image pos to 3D cordinate(origin as yellow)
+    yellow_y=yellow[0]
+    yellow_z=yellow[1]
+    yellow[1]=yellow_z-yellow[1]+0.00000000001
+    blue[1]=yellow_z-blue[1]+0.00000000002
+    green[1]=yellow_z-green[1]+0.00000000003
+    red[1]=yellow_z-red[1]+0.00000000004
 
+    yellow[0]=yellow[0]-yellow_y+0.00000000001
+    blue[0]=blue[0]-yellow_y+0.00000000002
+    green[0]=green[0]-yellow_y+0.00000000003
+    red[0]=red[0]-yellow_y+0.00000000004
+
+
+#--------------------------------------------------
     # make joint position into 2D array(Position array)
-    return np.array([[0.0,center[0],center[1]],[0.0,circle1Pos[0],circle1Pos[1]],[0.0,circle2Pos[0],circle2Pos[1]],[0.0,circle3Pos[0],circle3Pos[1]] ])
+    return np.array([[0.0,yellow[0],yellow[1]],[0.0,blue[0],blue[1]],[0.0,green[0],green[1]],[0.0,red[0],red[1]] ])
 
 
 
@@ -156,10 +170,13 @@ class image_converter:
     # Uncomment if you want to save the image
     #cv2.imwrite('image_copy.png', cv_image)
     
+#-----------------FALUTY Z AXIS(inverse it)---------------
 
+#---------------------------------------------
 
     #im1=cv2.imshow('window1',cv_image1)
     #cv2.waitKey(3)
+
 
  
     b = self.detect_joint_positions1(cv_image1)
@@ -172,7 +189,9 @@ class image_converter:
     try: 
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image1, "bgr8"))
       self.positions_pub1.publish(self.positions1) 
-      #print(self.positions1)
+      #print(self.positions1.data)
+
+
       with open('positions1.txt', 'wb') as fp:
         pickle.dump(self.positions1, fp)
 
