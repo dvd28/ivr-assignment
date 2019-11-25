@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dice/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/dice/ivr-assignment/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dice/catkin_ws/build
+CMAKE_BINARY_DIR = /home/dice/ivr-assignment/build
 
 # Utility rule file for _catkin_empty_exported_target.
 
@@ -63,10 +63,10 @@ ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/build: _catkin_empty
 .PHONY : ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/build
 
 ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/clean:
-	cd /home/dice/catkin_ws/build/ivr_assignment && $(CMAKE_COMMAND) -P CMakeFiles/_catkin_empty_exported_target.dir/cmake_clean.cmake
+	cd /home/dice/ivr-assignment/build/ivr_assignment && $(CMAKE_COMMAND) -P CMakeFiles/_catkin_empty_exported_target.dir/cmake_clean.cmake
 .PHONY : ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/clean
 
 ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/depend:
-	cd /home/dice/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dice/catkin_ws/src /home/dice/catkin_ws/src/ivr_assignment /home/dice/catkin_ws/build /home/dice/catkin_ws/build/ivr_assignment /home/dice/catkin_ws/build/ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/dice/ivr-assignment/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dice/ivr-assignment/src /home/dice/ivr-assignment/src/ivr_assignment /home/dice/ivr-assignment/build /home/dice/ivr-assignment/build/ivr_assignment /home/dice/ivr-assignment/build/ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : ivr_assignment/CMakeFiles/_catkin_empty_exported_target.dir/depend
 

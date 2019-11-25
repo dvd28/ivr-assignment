@@ -7,7 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/dice/catkin_ws/devel:$CMAKE_PREFIX_PATH"
-export PWD="/home/dice/catkin_ws/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/dice/catkin_ws/devel/share/common-lisp"
-export ROS_PACKAGE_PATH="/home/dice/catkin_ws/src:$ROS_PACKAGE_PATH"
+export CMAKE_PREFIX_PATH="/home/dice/ivr-assignment/devel:$CMAKE_PREFIX_PATH"
+export PWD="/home/dice/ivr-assignment/build"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/dice/ivr-assignment/devel/share/common-lisp"
+export ROS_PACKAGE_PATH="/home/dice/ivr-assignment/src:$ROS_PACKAGE_PATH"

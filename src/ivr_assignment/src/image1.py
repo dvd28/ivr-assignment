@@ -5,6 +5,7 @@ import sys
 import rospy
 import cv2
 import numpy as np
+import pickle
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray, Float64
@@ -19,7 +20,6 @@ class image_converter:
     rospy.init_node('image_processing', anonymous=True)
     # initialize a publisher to send images from camera1 to a topic named image_topic1
     self.image_pub1 = rospy.Publisher("image_topic1",Image, queue_size = 1)
-    self.joints_pub1 = rospy.Publisher("joints_pos1",Float64MultiArray, queue_size = 10)
     self.positions_pub1 = rospy.Publisher("joints_positions1",Float64MultiArray, queue_size = 10)
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
@@ -30,8 +30,12 @@ class image_converter:
 
 #----------------------------------
   def detect_red1(self,image):
-      # Isolate the blue colour in the image as a binary image
-      mask = cv2.inRange(image, (0, 0, 100), (0, 0, 255))
+      # This also detect red when the semi-transparent orange target is in front of it
+      mask1 = cv2.inRange(cv2.cvtColor(
+        image, cv2.COLOR_BGR2HSV), (177, 150, 20), (180, 255, 255))
+      mask2 = cv2.inRange(cv2.cvtColor(
+        image, cv2.COLOR_BGR2HSV), (0, 150, 20), (10, 255, 255))
+      mask = mask1 + mask2
       # This applies a dilate that makes the binary region larger (the more iterations the larger it becomes)
       kernel = np.ones((5, 5), np.uint8)
       mask = cv2.dilate(mask, kernel, iterations=3)
@@ -45,7 +49,7 @@ class image_converter:
 
   # Detecting the centre of the green circle
   def detect_green1(self,image):
-      mask = cv2.inRange(image, (0, 100, 0), (0, 255, 0))
+      mask = cv2.inRange(image, (0, 50, 0), (50, 255, 50))
       kernel = np.ones((5, 5), np.uint8)
       mask = cv2.dilate(mask, kernel, iterations=3)
       M = cv2.moments(mask)
@@ -56,7 +60,7 @@ class image_converter:
 
   # Detecting the centre of the blue circle
   def detect_blue1(self,image):
-      mask = cv2.inRange(image, (100, 0, 0), (255, 0, 0))
+      mask = cv2.inRange(image, (50, 0, 0), (255, 50, 50))
       kernel = np.ones((5, 5), np.uint8)
       mask = cv2.dilate(mask, kernel, iterations=3)
       M = cv2.moments(mask)
@@ -66,7 +70,7 @@ class image_converter:
 
   # Detecting the centre of the yellow circle
   def detect_yellow1(self,image):
-      mask = cv2.inRange(image, (0, 100, 100), (0, 255, 255))
+      mask = cv2.inRange(cv2.cvtColor(image, cv2.COLOR_BGR2HSV), (27, 180, 50), (33, 255, 255))
       kernel = np.ones((5, 5), np.uint8)
       mask = cv2.dilate(mask, kernel, iterations=3)
       M = cv2.moments(mask)
@@ -84,20 +88,6 @@ class image_converter:
       dist = np.sum((circle1Pos - circle2Pos)**2)
       return 3 / np.sqrt(dist)
 
-
-    # Calculate the relevant joint angles from the image
-  def detect_joint_angles1(self,image):
-    a = self.pixel2meter1(image)
-    # Obtain the centre of each coloured blob 
-    center = a * self.detect_yellow1(image)
-    circle1Pos = a * self.detect_blue1(image) 
-    circle2Pos = a * self.detect_green1(image) 
-    circle3Pos = a * self.detect_red1(image)
-    # Solve using trigonometry
-    ja1 = np.arctan2(center[0]- circle1Pos[0], center[1] - circle1Pos[1])
-    ja2 = np.arctan2(circle1Pos[0]-circle2Pos[0], circle1Pos[1]-circle2Pos[1]) - ja1
-    ja3 = np.arctan2(circle2Pos[0]-circle3Pos[0], circle2Pos[1]-circle3Pos[1]) - ja2 - ja1
-    return np.array([ja1, ja2, ja3])
   
   #--------------------------------------------
   def detect_joint_positions1(self,image):
@@ -122,18 +112,57 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    a = self.detect_joint_angles1(cv_image1)
-    b = self.detect_joint_positions1(cv_image1)
+
+
+    # some testing 
+    # Testing different yellow ranges
+    # 0:
+    # image_test = cv2.inRange(cv_image1, (0, 100, 100), (0, 255, 255))
+    # 1:
+    # image_test = cv2.inRange(cv_image1, (0, 50, 50), (50, 255, 255)
+    # 2:
+    # image_test = cv2.inRange(cv2.cvtColor(
+    #  cv_image1, cv2.COLOR_BGR2HSV), (27, 180, 50), (33, 255, 255))
+
+    # Testing different blue ranges
+    # 0:
+    # image_test = cv2.inRange(cv_image1, (100, 0, 0), (255, 0, 0))
+    # 1:
+    # image_test = cv2.inRange(cv_image1, (50, 0, 0), (255, 50, 50))
+
+    # Testing different green ranges
+    # 0:
+    # image_test = cv2.inRange(cv_image1, (0, 100, 0), (0, 255, 0))
+    # 1:
+    # image_test = cv2.inRange(cv_image1, (0, 50, 0), (50, 255, 50))
+
+    # Testing different red ranges
+    # 0:
+    # image_test = cv2.inRange(cv_image1, (0, 0, 100), (0, 0, 255))
+    # 1:
+    # image_test = cv2.inRange(cv_image1, (0, 0, 50), (50, 50, 255))
+    # 2:
+    '''
+    image_test1 = cv2.inRange(cv2.cvtColor(
+      cv_image1, cv2.COLOR_BGR2HSV), (177, 150, 20), (180, 255, 255))
+    image_test2 = cv2.inRange(cv2.cvtColor(
+      cv_image1, cv2.COLOR_BGR2HSV), (0, 150, 20), (10, 255, 255))
+    image_test = image_test1 + image_test2
+    cv2.imwrite('red2.png', image_test)
+    '''
+    #cv2.imwrite('test_image.png', cv_image1)
+
+
     # Uncomment if you want to save the image
     #cv2.imwrite('image_copy.png', cv_image)
     
 
 
-    im1=cv2.imshow('window1',cv_image1)
-    cv2.waitKey(3)
+    #im1=cv2.imshow('window1',cv_image1)
+    #cv2.waitKey(3)
 
-    self.joints1 = Float64MultiArray()
-    self.joints1.data=a
+ 
+    b = self.detect_joint_positions1(cv_image1)
     self.positions1 = Float64MultiArray()
     self.positions1.data=b
     
@@ -142,9 +171,7 @@ class image_converter:
     # Publish the results
     try: 
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image1, "bgr8"))
-      self.joints_pub1.publish(self.joints1)
       self.positions_pub1.publish(self.positions1) 
-      #print(self.joints1)
       #print(self.positions1)
       with open('positions1.txt', 'wb') as fp:
         pickle.dump(self.positions1, fp)
