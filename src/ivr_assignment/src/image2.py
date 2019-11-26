@@ -265,7 +265,7 @@ class image_converter:
     # Calculate the pixel/meter ratio once
     if self.pixel_meter_ratio == 0:
       self.pixel_meter_ratio = np.linalg.norm(self.yellow_img_xypos - self.blue_img_xypos)/2
-      print(self.pixel_meter_ratio)
+      #print(self.pixel_meter_ratio)
 
 
     # Detect the target's (x, z) position
@@ -286,7 +286,7 @@ class image_converter:
     try: 
       self.image_pub2.publish(self.bridge.cv2_to_imgmsg(cv_image2, "bgr8"))
       self.positions_pub2.publish(self.positions2) 
-      print(self.positions2.data)
+      #print(np.around(self.positions2.data, 2))
 
       # publish the estimated position of the target
       self.target_xpredict_pub.publish(target_xzposition[0])
