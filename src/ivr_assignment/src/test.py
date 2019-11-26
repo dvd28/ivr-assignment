@@ -49,7 +49,7 @@ class Tester:
       self.print_epos()    
 
     def process_angle3(self, a):
-      self.a2 = -a.data
+      self.a2 = a.data
       self.print_epos()
 
     def process_angle4(self, a):
@@ -58,7 +58,7 @@ class Tester:
 
 
     def print_epos(self):
-      print(np.around(FK(self.a0, self.a1, self.a2, self.a3, 2, 3, 2), 2))
+      print(np.around(FK(self.a0, self.a1, self.a2, self.a3, 2, 3, 2), 3))
 
 
 # call the class
