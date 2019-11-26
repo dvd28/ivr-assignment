@@ -107,7 +107,7 @@ class image_converter:
   
   #--------------------------------------------
   def detect_joint_positions2(self,image):
-    a = self.pixel2meter2(image)
+    a = 1/self.pixel_meter_ratio
     # Obtain the centre of each coloured blob 
     yellow = a * self.detect_yellow2(image)
     blue = a * self.detect_blue2(image) 
@@ -220,14 +220,14 @@ class image_converter:
 
 
     #uncomment to show tracking of target
-    
+    '''
     chamfmin_img_row = self.yellow_img_xypos[1] - zpredict_p
     chamfmin_img_col = self.yellow_img_xypos[0] + xpredict_p
     image_orange[(chamfmin_img_row-30):(chamfmin_img_row+30), chamfmin_img_col] = 100
     image_orange[chamfmin_img_row, (chamfmin_img_col-30):(chamfmin_img_col+30)] = 100
     im1=cv2.imshow('window1', image_orange)
     cv2.waitKey(1)
-    
+    '''
 
     return np.array([xpredict_m, zpredict_m])
 
@@ -286,7 +286,7 @@ class image_converter:
     try: 
       self.image_pub2.publish(self.bridge.cv2_to_imgmsg(cv_image2, "bgr8"))
       self.positions_pub2.publish(self.positions2) 
-      # print(self.positions2.data)
+      print(self.positions2.data)
 
       # publish the estimated position of the target
       self.target_xpredict_pub.publish(target_xzposition[0])

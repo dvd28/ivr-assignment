@@ -106,7 +106,7 @@ class image_converter:
   
   #--------------------------------------------
   def detect_joint_positions1(self,image):
-    a = self.pixel2meter1(image)
+    a = 1/self.pixel_meter_ratio
     # Obtain the centre of each coloured blob 
     yellow = a * self.detect_yellow1(image)
     blue = a * self.detect_blue1(image) 
@@ -327,7 +327,7 @@ class image_converter:
     try: 
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image1, "bgr8"))
       self.positions_pub1.publish(self.positions1) 
-      #print(self.positions1.data)
+      print(self.positions1.data)
 
       # publish estimated y-z coordinate of the target     
       self.target_ypredict_pub.publish(target_yzposition[0])
